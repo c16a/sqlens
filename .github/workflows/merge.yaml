@@ -4,24 +4,27 @@ on:
       - main
 
 jobs:
-  test:
-    name: Test
-    runs-on: ubuntu-24.04
+  buildWindowsAmd64:
+    name: Build Windows AMD64
+    runs-on: windows-latest
+    env:
+      GOOS: windows
+      GOARCH: amd64
     steps:
+      - name: "Set Release Version"
+        id: set_release_version
+        run: |
+          $RELEASE_VERSION = Get-Date -Format "yyyyMMdd.HHmmss"
+          "RELEASE_VERSION=$RELEASE_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: "Checkout"
         uses: actions/checkout@v4
-      - name: "Install dependencies"
-        run: |
-          sudo apt -y update
-          sudo apt install -y gcc g++ just golang xorg-dev libgl1-mesa-dev
-          sudo apt-get install -f -y
       - name: "Test"
         run: go test -v ./...
-  buildLinux:
-    name: Build Linux
+      - name: "Build"
+        run: go build -ldflags="-s -w" -o sqlens-${GOOS}-${GOARCH} main.go
+  buildLinuxAmd64:
+    name: Build Linux AMD64
     runs-on: ubuntu-24.04
-    needs:
-      - test
     env:
       GOOS: linux
       GOARCH: amd64
@@ -37,5 +40,46 @@ jobs:
           sudo apt -y update
           sudo apt install -y gcc g++ just golang xorg-dev libgl1-mesa-dev
           sudo apt-get install -f -y
-      - name: "Build AMD64"
+      - name: "Test"
+        run: go test -v ./...
+      - name: "Build"
+        run: go build -ldflags="-s -w" -o sqlens-${GOOS}-${GOARCH} main.go
+  buildLinuxArm64:
+    name: Build Linux ARM64
+    runs-on: ubuntu-24.04
+    env:
+      GOOS: linux
+      GOARCH: arm64
+    steps:
+      - name: "Set Release Version"
+        id: set_release_version
+        run: |
+          echo "RELEASE_VERSION=$(date '+%Y%m%d.%H%M%S')" >> $GITHUB_ENV
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Install dependencies"
+        run: |
+          sudo apt -y update
+          sudo apt install -y gcc g++ just golang xorg-dev libgl1-mesa-dev
+          sudo apt-get install -f -y
+      - name: "Test"
+        run: go test -v ./...
+      - name: "Build"
+        run: go build -ldflags="-s -w" -o sqlens-${GOOS}-${GOARCH} main.go
+  buildMacOsArm64:
+    name: Build macOS ARM64
+    runs-on: macos-latest
+    env:
+      GOOS: darwin
+      GOARCH: arm64
+    steps:
+      - name: "Set Release Version"
+        id: set_release_version
+        run: |
+          echo "RELEASE_VERSION=$(date '+%Y%m%d.%H%M%S')" >> $GITHUB_ENV
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Test"
+        run: go test -v ./...
+      - name: "Build"
         run: go build -ldflags="-s -w" -o sqlens-${GOOS}-${GOARCH} main.go
