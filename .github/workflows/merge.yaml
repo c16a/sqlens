@@ -79,6 +79,9 @@ jobs:
           echo "RELEASE_VERSION=$(date '+%Y%m%d.%H%M%S')" >> $GITHUB_ENV
       - name: "Checkout"
         uses: actions/checkout@v4
+      - name: "Install dependencies"
+        run: |
+          brew install go
       - name: "Test"
         run: go test -v ./...
       - name: "Build"
