@@ -25,6 +25,27 @@ jobs:
         run: go test -v ./...
       - name: "Build"
         run: go build -ldflags="-s -w" -o sqlens-${GOOS}-${GOARCH} main.go
+  buildWindowsArm64:
+    name: Build Windows ARM64
+    runs-on: windows-latest
+    env:
+      GOOS: windows
+      GOARCH: arm64
+    steps:
+      - name: "Set Release Version"
+        id: set_release_version
+        run: |
+          $RELEASE_VERSION = Get-Date -Format "yyyyMMdd.HHmmss"
+          "RELEASE_VERSION=$RELEASE_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Install dependencies"
+        run: |
+          choco install golang
+      - name: "Test"
+        run: go test -v ./...
+      - name: "Build"
+        run: go build -ldflags="-s -w" -o sqlens-${GOOS}-${GOARCH} main.go
   buildLinuxAmd64:
     name: Build Linux AMD64
     runs-on: ubuntu-24.04
@@ -41,7 +62,7 @@ jobs:
       - name: "Install dependencies"
         run: |
           sudo apt -y update
-          sudo apt install -y gcc g++ just golang xorg-dev libgl1-mesa-dev
+          sudo apt install -y gcc g++ just golang xorg-dev libgl1-mesa-dev libxkbcommon-dev
           sudo apt-get install -f -y
       - name: "Test"
         run: go test -v ./...
@@ -63,7 +84,7 @@ jobs:
       - name: "Install dependencies"
         run: |
           sudo apt -y update
-          sudo apt install -y gcc g++ just golang xorg-dev libgl1-mesa-dev
+          sudo apt install -y gcc g++ just golang xorg-dev libgl1-mesa-dev libxkbcommon-dev
           sudo apt-get install -f -y
       - name: "Test"
         run: go test -v ./...
