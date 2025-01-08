@@ -1,0 +1,10 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+# Run commands to download and install the .deb package
+runcmd:
+  - sudo apt -y update
+  - sudo apt -y upgrade
+  - sudo apt install -y gcc g++ just golang xorg-dev libgl1-mesa-dev
+  - sudo apt-get install -f -y

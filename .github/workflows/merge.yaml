@@ -1,0 +1,31 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-24.04
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Test"
+        run: go test -v ./...
+  buildLinux:
+    name: Build Linux
+    runs-on: ubuntu-24.04
+    needs:
+      - test
+    env:
+      GOOS: linux
+      GOARCH: amd64
+    steps:
+      - name: "Set Release Version"
+        id: set_release_version
+        run: |
+          echo "RELEASE_VERSION=$(date '+%Y%m%d.%H%M%S')" >> $GITHUB_ENV
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Build AMD64"
+        run: go build -ldflags="-s -w" -o sqlens-${GOOS}-${GOARCH} main.go
